@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Match Profit Calculator</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --border: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+
+        select, input {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Toggle Switches */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .toggle-container:last-child {
+            border-bottom: none;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        /* Results Panel */
+        .results-panel {
+            position: sticky;
+            top: 20px;
+            background: var(--text);
+            color: white;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .result-value.large {
+            font-size: 2.2rem;
+            color: var(--primary);
+        }
+
+        .result-value.negative {
+            color: #e74c3c;
+        }
+
+        .calculation-note {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .results-panel {
+                position: static;
+                order: -1; /* Show results at top on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pitch Booking Calculator</h1>
+
+        <div class="inputs-wrapper">
+            
+            <div class="card">
+                <h2>Logistics & Venue</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="venue">Venue Name</label>
+                        <select id="venue" onchange="handleVenueChange()"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pitchType">Pitch Type</label>
+                        <select id="pitchType" onchange="handlePitchTypeChange()"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pitchSize">Players per Team</label>
+                        <select id="pitchSize" onchange="calculate()"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hours">Duration</label>
+                        <select id="hours" onchange="calculate()"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teams">Number of Teams</label>
+                        <select id="teams" onchange="calculate()"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Pricing & Accounts</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="accountType">Peffermill Account Type</label>
+                        <select id="accountType" onchange="calculate()"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="peakPricing">Peak Pricing</label>
+                        <select id="peakPricing" onchange="calculate()"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="playerFee">Player Fee (£)</label>
+                        <input type="number" id="playerFee" value="5" step="0.50" oninput="calculate()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exemptions">Fee Exemptions (Count)</label>
+                        <input type="number" id="exemptions" value="0" min="0" oninput="calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Deductions & Extras</h2>
+                
+                <div class="toggle-container">
+                    <label for="taxDed">Apply Tax Deduction (Cost / 1.2)</label>
+                    <input type="checkbox" id="taxDed" onchange="calculate()">
+                </div>
+
+                <div class="toggle-container">
+                    <label for="useSpond">Use Spond (App Fees)</label>
+                    <input type="checkbox" id="useSpond" onchange="calculate()">
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="addCosts">Additional Costs (£)</label>
+                    <input type="number" id="addCosts" value="0" step="0.01" oninput="calculate()">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card results-panel">
+            <h2>Financial Results</h2>
+            
+            <div class="result-item">
+                <div class="result-label">Base Pitch Cost</div>
+                <div class="result-value" id="outBaseCost">£0.00</div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Spond Fees</div>
+                <div class="result-value" id="outSpondFee">£0.00</div>
+                <div id="spondNote" class="calculation-note"></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Total Arrangement Costs</div>
+                <div class="result-value" id="outTotalCost">£0.00</div>
+                <div class="calculation-note">Pitch (post-tax) + Spond + Extras</div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Total Fees Collected</div>
+                <div class="result-value" id="outCollected">£0.00</div>
+                <div id="playerCountNote" class="calculation-note"></div>
+            </div>
+
+            <div class="result-item" style="border-top: 2px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                <div class="result-label">NET PROFIT</div>
+                <div class="result-value large" id="outProfit">£0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA CONFIGURATION ---
+
+        const VENUES = [
+            "Peffermill",
+            "Portobello Powerleague",
+            "Marine Drive World of Football",
+            "Corn Exchange World of Football"
+        ];
+
+        // Pitch Types per Venue
+        const PITCH_TYPES = {
+            "Peffermill": ["5aside Pitch", "7/8/9aside Half-Pitch", "11aside Full-Pitch"],
+            "Portobello Powerleague": ["5aside Pitch", "7/8aside Pitch"],
+            "Marine Drive World of Football": ["5/6aside Pitch", "7/8aside Pitch"],
+            "Corn Exchange World of Football": ["5aside Pitch", "7aside Pitch"]
+        };
+
+        // Pitch Sizes (Team Size) per Pitch Type
+        const PITCH_SIZES = {
+            "5aside Pitch": [5],
+            "5/6aside Pitch": [5, 6],
+            "7aside Pitch": [7],
+            "7/8aside Pitch": [7, 8],
+            "7/8/9aside Half-Pitch": [7, 8, 9],
+            "11aside Full-Pitch": [7, 8, 9, 10, 11, 12, 13]
+        };
+
+        // Pricing Database
+        // Key format: Venue|PitchType|Hours|AccountType|Peak
+        const PRICING_DB = {
+            "Peffermill|5aside Pitch|1 hour|Student|N/A": 24.50,
+            "Peffermill|7/8/9aside Half-Pitch|1 hour|Student|N/A": 42.75,
+            "Peffermill|7/8/9aside Half-Pitch|1.5 hours|Student|N/A": 67.00,
+            "Peffermill|7/8/9aside Half-Pitch|2 hours|Student|N/A": 53.00,
+            "Peffermill|11aside Full-Pitch|1 hour|Student|N/A": 85.50,
+            "Peffermill|11aside Full-Pitch|1.5 hours|Student|N/A": 134.00,
+            "Peffermill|11aside Full-Pitch|2 hours|Student|N/A": 106.00,
+            
+            "Peffermill|5aside Pitch|1 hour|Community|N/A": 35.00,
+            "Peffermill|7/8/9aside Half-Pitch|1 hour|Community|N/A": 61.00,
+            "Peffermill|7/8/9aside Half-Pitch|1.5 hours|Community|N/A": 67.00,
+            "Peffermill|7/8/9aside Half-Pitch|2 hours|Community|N/A": 75.50,
+            "Peffermill|11aside Full-Pitch|1 hour|Community|N/A": 122.00,
+            "Peffermill|11aside Full-Pitch|1.5 hours|Community|N/A": 134.00,
+            "Peffermill|11aside Full-Pitch|2 hours|Community|N/A": 151.00,
+
+            "Portobello Powerleague|5aside Pitch|1 hour|N/A|Peak": 59.50,
+            "Portobello Powerleague|5aside Pitch|1 hour|N/A|Off-Peak": 46.50,
+            "Portobello Powerleague|7/8aside Pitch|1 hour|N/A|Peak": 74.50,
+            "Portobello Powerleague|7/8aside Pitch|1 hour|N/A|Off-Peak": 77.00, // Anomaly preserved
+
+            "Marine Drive World of Football|5/6aside Pitch|1 hour|N/A|Off-Peak": 45.00,
+            "Marine Drive World of Football|5/6aside Pitch|1 hour|N/A|Peak": 79.00,
+            "Marine Drive World of Football|7/8aside Pitch|1 hour|N/A|Off-Peak": 63.00,
+            "Marine Drive World of Football|7/8aside Pitch|1 hour|N/A|Peak": 89.00,
+
+            "Corn Exchange World of Football|5aside Pitch|1 hour|N/A|Off-Peak": 45.00,
+            "Corn Exchange World of Football|5aside Pitch|1 hour|N/A|Peak": 79.00,
+            "Corn Exchange World of Football|7aside Pitch|1 hour|N/A|Off-Peak": 78.00,
+            "Corn Exchange World of Football|7aside Pitch|1 hour|N/A|Peak": 95.00
+        };
+
+        // --- DOM ELEMENTS ---
+        const el = {
+            venue: document.getElementById('venue'),
+            pitchType: document.getElementById('pitchType'),
+            pitchSize: document.getElementById('pitchSize'),
+            hours: document.getElementById('hours'),
+            teams: document.getElementById('teams'),
+            accountType: document.getElementById('accountType'),
+            peakPricing: document.getElementById('peakPricing'),
+            playerFee: document.getElementById('playerFee'),
+            exemptions: document.getElementById('exemptions'),
+            taxDed: document.getElementById('taxDed'),
+            useSpond: document.getElementById('useSpond'),
+            addCosts: document.getElementById('addCosts'),
+            // Outputs
+            outBaseCost: document.getElementById('outBaseCost'),
+            outSpondFee: document.getElementById('outSpondFee'),
+            outTotalCost: document.getElementById('outTotalCost'),
+            outCollected: document.getElementById('outCollected'),
+            outProfit: document.getElementById('outProfit'),
+            spondNote: document.getElementById('spondNote'),
+            playerCountNote: document.getElementById('playerCountNote')
+        };
+
+        // --- INITIALIZATION & EVENTS ---
+
+        function init() {
+            // Populate Venues
+            populateSelect(el.venue, VENUES);
+            el.venue.value = "Peffermill"; // Default
+
+            handleVenueChange(); // Trigger cascade
+        }
+
+        // Helper to fill select boxes
+        function populateSelect(element, options) {
+            element.innerHTML = '';
+            options.forEach(opt => {
+                let option = document.createElement('option');
+                option.value = opt;
+                option.text = opt;
+                element.appendChild(option);
+            });
+        }
+
+        // --- LOGIC HANDLERS ---
+
+        function handleVenueChange() {
+            const venue = el.venue.value;
+
+            // 1. Update Pitch Types
+            populateSelect(el.pitchType, PITCH_TYPES[venue]);
+            
+            // 2. Update Account Type Options
+            if (venue === "Peffermill") {
+                populateSelect(el.accountType, ["Student", "Community"]);
+                el.accountType.value = "Student";
+            } else {
+                populateSelect(el.accountType, ["N/A"]);
+            }
+
+            // 3. Update Peak Pricing Options
+            if (venue === "Peffermill") {
+                populateSelect(el.peakPricing, ["N/A"]);
+            } else {
+                populateSelect(el.peakPricing, ["Peak", "Off-Peak"]);
+                el.peakPricing.value = "Peak";
+            }
+
+            handlePitchTypeChange();
+        }
+
+        function handlePitchTypeChange() {
+            const venue = el.venue.value;
+            const type = el.pitchType.value;
+
+            // 1. Update Pitch Size (Players per team)
+            populateSelect(el.pitchSize, PITCH_SIZES[type]);
+
+            // 2. Update Hours Options
+            let hoursOpts = ["1 hour"];
+            if (venue === "Peffermill") {
+                if (type === "7/8/9aside Half-Pitch" || type === "11aside Full-Pitch") {
+                    hoursOpts = ["1 hour", "1.5 hours", "2 hours"];
+                }
+            }
+            populateSelect(el.hours, hoursOpts);
+
+            // 3. Update Teams Options
+            let teamOpts = [2];
+            if (venue === "Peffermill" && type === "11aside Full-Pitch") {
+                teamOpts = [2, 4, 8];
+            }
+            populateSelect(el.teams, teamOpts);
+
+            calculate();
+        }
+
+        function calculate() {
+            // --- GATHER INPUTS ---
+            const inputs = {
+                venue: el.venue.value,
+                pitchType: el.pitchType.value,
+                hours: el.hours.value,
+                account: el.accountType.value,
+                peak: el.peakPricing.value,
+                teamSize: parseInt(el.pitchSize.value),
+                teams: parseInt(el.teams.value),
+                playerFee: parseFloat(el.playerFee.value) || 0,
+                exemptions: parseInt(el.exemptions.value) || 0,
+                taxDed: el.taxDed.checked,
+                useSpond: el.useSpond.checked,
+                addCosts: parseFloat(el.addCosts.value) || 0
+            };
+
+            // --- 1. GET BASE PITCH FEE ---
+            // Construct key for lookup
+            const key = `${inputs.venue}|${inputs.pitchType}|${inputs.hours}|${inputs.account}|${inputs.peak}`;
+            let basePitchFee = PRICING_DB[key];
+
+            if (basePitchFee === undefined) {
+                // Fallback for safety, though UI logic should prevent this
+                console.error("Price not found for key:", key);
+                basePitchFee = 0;
+            }
+
+            // --- 2. CALCULATE PITCH COST AFTER TAX ---
+            let pitchCostFinal = basePitchFee;
+            if (inputs.taxDed) {
+                pitchCostFinal = basePitchFee / 1.2;
+            }
+
+            // --- 3. CALCULATE PLAYER METRICS ---
+            const totalSlots = inputs.teams * inputs.teamSize;
+            const payingPlayers = Math.max(0, totalSlots - inputs.exemptions);
+            const totalCollected = payingPlayers * inputs.playerFee;
+
+            // --- 4. CALCULATE SPOND FEES ---
+            let totalSpondFees = 0;
+            let spondPerTx = 0;
+
+            if (inputs.useSpond) {
+                // Formula: Round up to next penny ((Fee * 0.025) + 0.20)
+                let rawTxFee = (inputs.playerFee * 0.025) + 0.20;
+                // Round up to next penny logic:
+                spondPerTx = Math.ceil(rawTxFee * 100) / 100;
+                totalSpondFees = payingPlayers * spondPerTx;
+            }
+
+            // --- 5. TOTAL ARRANGEMENT COSTS ---
+            const totalArrangementCosts = pitchCostFinal + totalSpondFees + inputs.addCosts;
+
+            // --- 6. NET PROFIT ---
+            const netProfit = totalCollected - totalArrangementCosts;
+
+            // --- RENDER OUTPUTS ---
+            const fmt = (num) => "£" + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            el.outBaseCost.textContent = fmt(basePitchFee);
+            el.outSpondFee.textContent = fmt(totalSpondFees);
+            el.outTotalCost.textContent = fmt(totalArrangementCosts);
+            el.outCollected.textContent = fmt(totalCollected);
+            el.outProfit.textContent = fmt(netProfit);
+
+            // Styling for profit
+            if (netProfit < 0) {
+                el.outProfit.className = "result-value large negative";
+            } else {
+                el.outProfit.className = "result-value large";
+                el.outProfit.style.color = "#2ecc71"; // Force green
+            }
+
+            // Notes
+            if (inputs.useSpond) {
+                el.spondNote.textContent = `${payingPlayers} txs @ ${fmt(spondPerTx)} each`;
+            } else {
+                el.spondNote.textContent = "Spond disabled";
+            }
+
+            el.playerCountNote.textContent = `${payingPlayers} paying players (${totalSlots} slots - ${inputs.exemptions} exempt)`;
+        }
+
+        // Run initialization
+        init();
+
+    </script>
+</body>
+</html>
