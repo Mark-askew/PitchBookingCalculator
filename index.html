@@ -2,56 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pitch Booking Calculator</title>
     <style>
         :root {
             --primary: #2ecc71;
             --primary-dark: #27ae60;
-            --bg: #f4f7f6;
+            --bg: #f0f2f5;
             --card-bg: #ffffff;
             --text: #2c3e50;
             --border: #dcdde1;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 40px; /* Space for scroll */
+            line-height: 1.5;
         }
 
         .container {
             display: grid;
-            grid-template-columns: 1fr 350px;
+            grid-template-columns: 1fr 350px; /* Desktop layout */
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1100px;
+            margin: 0 auto;
             width: 100%;
-        }
-
-        /* Card Styles */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
         }
 
         h1 {
             grid-column: 1 / -1;
             text-align: center;
             color: var(--primary-dark);
-            margin-bottom: 10px;
+            margin: 10px 0 20px 0;
+            font-size: 1.8rem;
         }
 
         h2 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #7f8c8d;
             margin-top: 0;
             margin-bottom: 15px;
@@ -59,13 +55,24 @@
             padding-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 700;
         }
 
-        /* Form Grid */
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 0;
+            height: fit-content;
+        }
+
+        /* Form Grid - Responsive */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
         }
 
         .form-group {
@@ -76,95 +83,221 @@
         label {
             font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #34495e;
         }
 
-        select, input {
-            padding: 10px;
+        /* Mobile-friendly Inputs */
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            border-radius: 8px;
+            font-size: 16px; /* Prevents iOS zoom */
+            background-color: #fff;
+            appearance: none; /* Removes default OS styling */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232c3e50%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 10px auto;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="number"] {
+            background-image: none; /* No arrow for number inputs */
         }
 
         select:focus, input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
         }
 
-        /* Toggle Switches */
+        /* Modern Toggle Switches */
         .toggle-container {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
         }
         
-        .toggle-container:last-child {
-            border-bottom: none;
+        .toggle-container span {
+            margin-bottom: 0;
+            cursor: pointer;
+            flex: 1;
+            /* Re-applying global label styles */
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #34495e;
         }
 
-        input[type="checkbox"] {
-            width: 20px;
+        /* Custom Toggle CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
             height: 20px;
-            accent-color: var(--primary);
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
         }
 
         /* Results Panel */
         .results-panel {
+            background: #2c3e50;
+            color: white;
             position: sticky;
             top: 20px;
-            background: var(--text);
-            color: white;
+        }
+
+        .results-panel h2 {
+            color: rgba(255,255,255,0.7);
+            border-color: rgba(255,255,255,0.2);
         }
 
         .result-item {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .result-item:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-content {
+            text-align: right;
         }
 
         .result-label {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             opacity: 0.8;
-            margin-bottom: 5px;
         }
 
         .result-value {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
+            font-family: 'Consolas', 'Monaco', monospace; /* Tabular numbers alignment */
         }
 
         .result-value.large {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             color: var(--primary);
         }
 
         .result-value.negative {
-            color: #e74c3c;
+            color: #e74c3c !important;
         }
 
         .calculation-note {
             font-size: 0.75rem;
             opacity: 0.6;
             font-style: italic;
-            margin-top: 5px;
+            margin-top: 2px;
+            display: block;
+            text-align: right;
         }
 
+        /* Inputs Wrapper gap management */
+        .inputs-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Mobile Breakpoint */
         @media (max-width: 900px) {
+            body {
+                padding: 10px;
+            }
+
             .container {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            /* Move Results to top on mobile */
             .results-panel {
-                position: static;
-                order: -1; /* Show results at top on mobile */
+                order: -1;
+                position: relative; /* Not sticky on mobile to save vertical space */
+                top: 0;
+                background: #2c3e50;
+                padding: 15px;
+            }
+
+            .results-panel .result-item {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+            
+            /* Make the Profit section stand out more on mobile */
+            .result-item:last-child {
+                background: rgba(255,255,255,0.1);
+                padding: 15px;
+                border-radius: 8px;
+                margin-top: 10px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr; /* Stack inputs on phone */
+            }
+            
+            /* Exceptions for wider phones/tablets */
+            @media (min-width: 500px) {
+                .form-grid {
+                    grid-template-columns: 1fr 1fr;
+                }
             }
         }
     </style>
@@ -209,24 +342,24 @@
             <div class="card">
                 <h2>Pricing & Accounts</h2>
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="accountType">Peffermill Account Type</label>
+                    <div class="form-group" id="groupAccountType">
+                        <label for="accountType">Account Type</label>
                         <select id="accountType" onchange="calculate()"></select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="groupPeakPricing">
                         <label for="peakPricing">Peak Pricing</label>
                         <select id="peakPricing" onchange="calculate()"></select>
                     </div>
 
                     <div class="form-group">
                         <label for="playerFee">Player Fee (£)</label>
-                        <input type="number" id="playerFee" value="5" step="0.50" oninput="calculate()">
+                        <input type="number" id="playerFee" value="5" step="0.50" inputmode="decimal" oninput="calculate()">
                     </div>
 
                     <div class="form-group">
-                        <label for="exemptions">Fee Exemptions (Count)</label>
-                        <input type="number" id="exemptions" value="0" min="0" oninput="calculate()">
+                        <label for="exemptions">Fee Exemptions</label>
+                        <input type="number" id="exemptions" value="0" min="0" inputmode="numeric" oninput="calculate()">
                     </div>
                 </div>
             </div>
@@ -234,23 +367,27 @@
             <div class="card">
                 <h2>Deductions & Extras</h2>
                 
-                <div class="toggle-container">
-                    <label for="taxDed">Apply Tax Deduction (Cost / 1.2)</label>
-                    <input type="checkbox" id="taxDed" onchange="calculate()">
-                </div>
+                <label class="toggle-container" for="taxDed">
+                    <span>Tax Deduction (Remove 20% VAT)</span>
+                    <div class="switch">
+                        <input type="checkbox" id="taxDed" onchange="calculate()">
+                        <span class="slider"></span>
+                    </div>
+                </label>
 
-                <div class="toggle-container">
-                    <label for="useSpond">Use Spond (App Fees)</label>
-                    <input type="checkbox" id="useSpond" onchange="calculate()">
-                </div>
+                <label class="toggle-container" for="useSpond">
+                    <span>Spond Used for Transactions</span>
+                    <div class="switch">
+                        <input type="checkbox" id="useSpond" onchange="calculate()">
+                        <span class="slider"></span>
+                    </div>
+                </label>
 
                 <div class="form-group" style="margin-top: 15px;">
                     <label for="addCosts">Additional Costs (£)</label>
-                    <input type="number" id="addCosts" value="0" step="0.01" oninput="calculate()">
+                    <input type="number" id="addCosts" value="0" step="0.01" inputmode="decimal" oninput="calculate()">
                 </div>
             </div>
-
-        </div>
 
         <div class="card results-panel">
             <h2>Financial Results</h2>
@@ -262,24 +399,30 @@
 
             <div class="result-item">
                 <div class="result-label">Spond Fees</div>
-                <div class="result-value" id="outSpondFee">£0.00</div>
-                <div id="spondNote" class="calculation-note"></div>
+                <div class="result-content">
+                    <div class="result-value" id="outSpondFee">£0.00</div>
+                    <div id="spondNote" class="calculation-note"></div>
+                </div>
             </div>
 
             <div class="result-item">
-                <div class="result-label">Total Arrangement Costs</div>
-                <div class="result-value" id="outTotalCost">£0.00</div>
-                <div class="calculation-note">Pitch (post-tax) + Spond + Extras</div>
+                <div class="result-label">Total Costs</div>
+                <div class="result-content">
+                    <div class="result-value" id="outTotalCost">£0.00</div>
+                    <div class="calculation-note">Pitch + Spond + Extras</div>
+                </div>
             </div>
 
             <div class="result-item">
-                <div class="result-label">Total Fees Collected</div>
-                <div class="result-value" id="outCollected">£0.00</div>
-                <div id="playerCountNote" class="calculation-note"></div>
+                <div class="result-label">Fees Collected</div>
+                <div class="result-content">
+                    <div class="result-value" id="outCollected">£0.00</div>
+                    <div id="playerCountNote" class="calculation-note"></div>
+                </div>
             </div>
 
-            <div class="result-item" style="border-top: 2px solid rgba(255,255,255,0.2); padding-top: 15px;">
-                <div class="result-label">NET PROFIT</div>
+            <div class="result-item">
+                <div class="result-label" style="font-weight:bold; color: white;">NET PROFIT</div>
                 <div class="result-value large" id="outProfit">£0.00</div>
             </div>
         </div>
@@ -401,18 +544,32 @@
             // 1. Update Pitch Types
             populateSelect(el.pitchType, PITCH_TYPES[venue]);
             
-            // 2. Update Account Type Options
+            // 2. Logic to Show/Hide Fields based on Venue
+            // We get the wrapper divs to toggle visibility
+            const groupAccount = document.getElementById('groupAccountType');
+            const groupPeak = document.getElementById('groupPeakPricing');
+
             if (venue === "Peffermill") {
+                // For Peffermill: Show Account, Hide Peak
+                groupAccount.style.display = 'flex';
+                groupPeak.style.display = 'none';
+
+                // Set relevant values
                 populateSelect(el.accountType, ["Student", "Community"]);
                 el.accountType.value = "Student";
-            } else {
-                populateSelect(el.accountType, ["N/A"]);
-            }
-
-            // 3. Update Peak Pricing Options
-            if (venue === "Peffermill") {
+                
+                // Set hidden field to N/A for calculation safety
                 populateSelect(el.peakPricing, ["N/A"]);
+
             } else {
+                // For Others: Hide Account, Show Peak
+                groupAccount.style.display = 'none';
+                groupPeak.style.display = 'flex';
+
+                // Set hidden field to N/A for calculation safety
+                populateSelect(el.accountType, ["N/A"]);
+
+                // Set relevant values
                 populateSelect(el.peakPricing, ["Peak", "Off-Peak"]);
                 el.peakPricing.value = "Peak";
             }
@@ -524,7 +681,7 @@
             if (inputs.useSpond) {
                 el.spondNote.textContent = `${payingPlayers} txs @ ${fmt(spondPerTx)} each`;
             } else {
-                el.spondNote.textContent = "Spond disabled";
+                el.spondNote.textContent = "No Spond charges";
             }
 
             el.playerCountNote.textContent = `${payingPlayers} paying players (${totalSlots} slots - ${inputs.exemptions} exempt)`;
@@ -536,4 +693,3 @@
     </script>
 </body>
 </html>
-
