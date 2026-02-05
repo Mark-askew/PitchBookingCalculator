@@ -359,6 +359,11 @@
                         <select id="peakPricing" onchange="calculate()"></select>
                     </div>
 
+                    <div class="form-group" id="groupCustomBaseCost" style="display:none;">
+                        <label for="customBaseCost">Base Pitch Cost (£)</label>
+                        <input type="number" id="customBaseCost" value="0" step="0.50" min="0" inputmode="decimal" oninput="calculate()">
+                    </div>
+
                     <div class="form-group">
                         <label for="playerFee">Player Fee (£)</label>
                         <input type="number" id="playerFee" value="5" step="0.50" inputmode="decimal" oninput="calculate()">
@@ -442,7 +447,8 @@
             "Peffermill",
             "Portobello Powerleague",
             "Marine Drive World of Football",
-            "Corn Exchange World of Football"
+            "Corn Exchange World of Football",
+            "Custom Venue"
         ];
 
         // Pitch Types per Venue
@@ -450,7 +456,8 @@
             "Peffermill": ["5aside Pitch", "7/8/9aside Half-Pitch", "11aside Full-Pitch"],
             "Portobello Powerleague": ["5aside Pitch", "7/8aside Pitch"],
             "Marine Drive World of Football": ["5/6aside Pitch", "7/8aside Pitch"],
-            "Corn Exchange World of Football": ["5aside Pitch", "7aside Pitch"]
+            "Corn Exchange World of Football": ["5aside Pitch", "7aside Pitch"],
+            "Custom Venue": ["Custom Pitch"]
         };
 
         // Pitch Sizes (Team Size) per Pitch Type
@@ -460,7 +467,8 @@
             "7aside Pitch": [7],
             "7/8aside Pitch": [7, 8],
             "7/8/9aside Half-Pitch": [7, 8, 9],
-            "11aside Full-Pitch": [7, 8, 9, 10, 11, 12, 13]
+            "11aside Full-Pitch": [7, 8, 9, 10, 11, 12, 13],
+            "Custom Pitch": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         };
 
         // Pricing Database
@@ -507,6 +515,7 @@
             teams: document.getElementById('teams'),
             accountType: document.getElementById('accountType'),
             peakPricing: document.getElementById('peakPricing'),
+            customBaseCost: document.getElementById('customBaseCost'),
             playerFee: document.getElementById('playerFee'),
             exemptions: document.getElementById('exemptions'),
             taxDed: document.getElementById('taxDed'),
@@ -555,11 +564,22 @@
             // We get the wrapper divs to toggle visibility
             const groupAccount = document.getElementById('groupAccountType');
             const groupPeak = document.getElementById('groupPeakPricing');
+            const groupCustomBaseCost = document.getElementById('groupCustomBaseCost');
 
-            if (venue === "Peffermill") {
+            if (venue === "Custom Venue") {
+                // For Custom Venue: Hide Account, Hide Peak, Show Custom Base Cost
+                groupAccount.style.display = 'none';
+                groupPeak.style.display = 'none';
+                groupCustomBaseCost.style.display = 'flex';
+
+                populateSelect(el.accountType, ["N/A"]);
+                populateSelect(el.peakPricing, ["N/A"]);
+
+            } else if (venue === "Peffermill") {
                 // For Peffermill: Show Account, Hide Peak
                 groupAccount.style.display = 'flex';
                 groupPeak.style.display = 'none';
+                groupCustomBaseCost.style.display = 'none';
 
                 // Set relevant values
                 populateSelect(el.accountType, ["Student", "Community"]);
@@ -572,6 +592,7 @@
                 // For Others: Hide Account, Show Peak
                 groupAccount.style.display = 'none';
                 groupPeak.style.display = 'flex';
+                groupCustomBaseCost.style.display = 'none';
 
                 // Set hidden field to N/A for calculation safety
                 populateSelect(el.accountType, ["N/A"]);
@@ -632,14 +653,18 @@
             };
 
             // --- 1. GET BASE PITCH FEE ---
-            // Construct key for lookup
-            const key = `${inputs.venue}|${inputs.pitchType}|${inputs.hours}|${inputs.account}|${inputs.peak}`;
-            let basePitchFee = PRICING_DB[key];
+            let basePitchFee;
+            if (inputs.venue === "Custom Venue") {
+                basePitchFee = parseFloat(el.customBaseCost.value) || 0;
+            } else {
+                // Construct key for lookup
+                const key = `${inputs.venue}|${inputs.pitchType}|${inputs.hours}|${inputs.account}|${inputs.peak}`;
+                basePitchFee = PRICING_DB[key];
 
-            if (basePitchFee === undefined) {
-                // Fallback for safety, though UI logic should prevent this
-                console.error("Price not found for key:", key);
-                basePitchFee = 0;
+                if (basePitchFee === undefined) {
+                    console.error("Price not found for key:", key);
+                    basePitchFee = 0;
+                }
             }
 
             // --- 2. CALCULATE PITCH COST AFTER TAX ---
